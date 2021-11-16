@@ -1,0 +1,619 @@
+
+\documentclass{refcard}
+
+\title{kubernetes}
+\logo{kubernetes_logo.png}
+\theme{default}
+
+\begin{document}
+\maketitle
+
+% --------------------------------------------------
+% WHAT IS KUBERNETES ?
+% --------------------------------------------------
+\section{what is kubernetes?}
+
+\textbullet\ Kubernetes come out from Google\\
+\textbullet\ In 2014 it was opened source under the Apache 2.0 license and handed over the Cloud Native COmputing Foundation\\
+\textbullet\ Kubernetes is Written in Go \\
+\textbullet\ Kubernetes relates to Google's Borg and Omega Systems (proprietaty softwares)\\
+\textbullet\ Kubernetes comes from the greek word meaning helmsman (logo is a helm of a ship)\\
+\textbullet\ Kubernetes is often written K8s, the 8 here replaces the height characters between K and s\\
+\textbullet\ Kubernetes is a portable, extensible, open-source platform for managing containerized workloads and services, that facilitates both declarative configuration and automation\\
+\textbullet\ At the highest level, Kubernetes is an orchestrator of microservices apps\\
+
+\textbullet\ Some features available: service discovery/Load balancing, storage orchestration, automate rollouts/rollbacks, self-healing, secret and configuration management, horizontal scaling\\
+ 
+\textbullet\ Some developer use cases: emulate production, move from docker compose to kubernetes, create an end-to-end testing environment, ensure application scales properly, ensure secrets/config are working properly, performance testing scenarios, workload scenarios (CI/CD), learn how to leverage deployment options, help devops create resources and solve problems\\
+
+% --------------------------------------------------
+% SOME DEFINITIONS
+% --------------------------------------------------
+\section{some definitions}
+
+\textbullet\ \textbf{cluster:} a set of nodes that run containerized applications\\
+\textbullet\ \textbf{control plane:} manages the worker nodes and the Pods in the cluster\\
+\textbullet\ \textbf{master:} a node which controls and manages a set of worker nodes (workloads runtime) and resembles a cluster in K8s\\
+\textbullet\ \textbf{node:} a worker machine (either a virtual or a physical machine) that manages pods and the container running on a machine\\
+\textbullet\ \textbf{pod:} smallest execution unit in K8s\\
+
+%\textbf{microservices:} cloud native architectural approach in which a single application is composed of many loosely coupled and independently deployable smaller components, or services\\
+%\textbf{clusters:} cluster of one master node and a number of worker nodes\\
+%\textbf{masters:} a node which controls and manages a set of worker nodes (workloads runtime) and resembles a cluster in Kubernetes\\
+%\textbf{nodes:} (alose worker nodes) used to run containerized applications and handle networking to ensure that traffic between applications across the cluster and from outside of the cluster can be properly facilitated \\
+%\textbf{pods:} unit of replication on a cluster\\
+
+% --------------------------------------------------
+% MASTER NODE
+% --------------------------------------------------
+\section{master node}
+
+A master node is a set of three processes that run on a single node in a cluster:%\vspace{-1.0em}
+\begin{itemize}
+    \item \textbf{api server:} front-end to the control plane; exposes the API (REST)%\vspace{-1.5em}
+    \item \textbf{controller manager:} a deamon that controls the controllers (nodes, deployment, endpoints,...) which are non-terminating loops that regulate the state of the system; reconciles observed state with desired state%\vspace{-1.5em}
+    \item \textbf{scheduler:} watches API Server for new work tasks and assigns work to cluster nodes
+\end{itemize}
+%\vspace{-1.0em}
+Kubernetes cluster can use \textbf{etcd}, a consistent and highly-available key value store used as a store for all cluster data
+
+%\vspace{-1.5em}
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_master.drawio.pdf}
+\end{center}
+
+% --------------------------------------------------
+% WORKER NODE
+% --------------------------------------------------
+\section{worker node}
+
+A worker node is a node used to run containerized applications and handle networking to ensure that traffic between applications across the cluster and from outside of the cluster can be properly facilitated.\\
+
+A worker node generally runs:
+\begin{itemize}
+    \item \textbf{kubelet:} a process responsible for communication between the Kubernetes control plane and the Node; it manages the Pods and the containers running on a machine
+    \item \textbf{kube-proxy:} a network proxy that runs on each node in a cluster and maintains network rules on nodes
+    \item \textbf{container runtime:} (\textit{i.e.} Docker) responsible for pulling the container image from a registry, unpacking the container, and running the application
+\end{itemize}
+%\vspace{-1.5em}
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_worker.drawio.pdf}
+\end{center}
+
+% --------------------------------------------------
+% PODS
+% --------------------------------------------------
+\section{pods}
+
+A pod is the basic execution unit of a Kubernetes application, the smallest and simplest unit in the Kubernetes object model which can be created or deployed. A Pod represents a single instance of a running process in a cluster.\\
+
+Pods acts as an environment for containers and can contain one or more containers (such as Docker containers). When a Pod runs multiple containers, the containers are managed as a single entity and share the Pod's resources. Pods also contain shared networking and storage resources for their containers.\\
+
+Pods can be organized as \textit{application parts} (server, caching, APIs, database, etc.)\\
+
+%\vspace{-1.5em}
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_pod.drawio.pdf}
+\end{center}
+
+Two containers are \textbf{Tightly coupled} when they absolutely need to share environment (containers must be in same pod). They are \textbf{loosely coupled} when they don't absolutely need to share resources (containers can be in different pods).\\
+
+Pod deployment is an atomic operation (all-or-nothing job), the pod is available for service only when all of the containers in it are up and running: pods live and die but never come back to life.\\
+
+Containers in a pod are always schedule to the same node.\\
+
+A master is going to schedule pods on a worker node. Pods can be horizontally scaled by creating replicas clones and Kubernetes can load-balance between them by automatically remove/create pods.\\
+
+Pod have a unique IP adress. Pod containers share the same network namespace (share IP/port) and the same loopback network interface (localhost). Container processes need to bind different ports within a pod. Ports can be reused by containers in separate ports.
+
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_podB.drawio.pdf}
+\end{center}
+
+Schedule a pod (imperative)
+\begin{ttyenv}
+kubectl run [podname] --image=[image]
+\end{ttyenv}
+
+Schedule a pod (declarative)
+\begin{ttyenv}
+kubectl create/apply [command with a YAML file]
+\end{ttyenv}
+
+List only pods
+\begin{ttyenv}
+kubectl get pods
+\end{ttyenv}
+
+List all resources
+\begin{ttyenv}
+kubectl get all
+\end{ttyenv}
+
+Get detailed informations about a pod
+\begin{ttyenv}
+kubectl describe pod [podname]
+\end{ttyenv}
+
+Execute a command inside a running pod
+\begin{ttyenv}
+kubectl exec [podname] -it [command]
+\end{ttyenv}
+
+Pods and containers are only accessible within the Kubernetes cluster by default. To expose a container port externally:
+\begin{ttyenv}
+kubectl port-forward [podname] [extern]:[intern]
+\end{ttyenv}
+
+Running a pod will cause a deployment to be created. To delete a pod:
+\begin{ttyenv}
+kubectl delete pod [podname]
+\end{ttyenv}
+
+...or to delete a deployment:
+\begin{ttyenv}
+kubectl delete deployment [deploy_name]
+\end{ttyenv}
+
+Declarative pod's creation using a yaml file
+
+\begin{yamlbox}[title={nginx.pod.yml}]
+apiVersion: v1  # k8s api version
+  kind: Pod     # type of K8s resource
+  metadata:     # metadata about the pod
+    name: my-nginx
+  spec:         # spec/blueprint of the pod
+    containers: # info about containers
+    - name: my-nginx
+      image: nginx:alpine
+      ports:
+      - containerPort: 80
+      resources:
+\end{yamlbox}
+
+To test creation of a pod using a YAML file
+\begin{ttyenv}
+kubectl create -f [file.pod.yml] \
+  --dry-run --validate=true
+\end{ttyenv}
+
+To create a pod using a YAML file
+\begin{ttyenv}
+kubectl create -f [file.pod.yml] 
+kubectl apply -f [file.pod.yml] 
+\end{ttyenv}
+
+\verb|apply| allows to create and to update if the resource already exists.\\
+\verb|--save-config| option for \verb|create| allows to get information about the YAML file that was last run.\\
+
+A pod create using a YAML file can be delete with:
+\begin{ttyenv}
+kubectl delete pod [podname]
+\end{ttyenv}
+...or...
+\begin{ttyenv}
+kubectl delete -f [file.pod.yml] 
+\end{ttyenv}
+
+Edit and update resources definitions
+\begin{ttyenv}
+kubectl edit -f [file.pod.yml] 
+\end{ttyenv}
+
+Kubernetes relies on Probes to determine the health of a pod container (diagnostic performed periodically by kubelet on a container):\\
+\textbullet\ liveness probe can be used to determine if a pod is healthy and running as expected\\
+\textbullet\ readiness probe can be used to determine if a pod should received requests\\
+
+Failed pod containers are recreated by default (restartPolicy defaults to Always)\\
+
+Check health of pods:\\
+\textbullet\ \textbf{ExecAction:} execute an action inside the container\\
+\textbullet\ \textbf{TCPSocketAction:} TCP check against the container's IP adress on a specified port\\
+\textbullet\ \textbf{HTTPGetAction:} HTTP GET request against container\\
+
+Probes can have the following results: success, failure, unknown\\
+
+Example using HTTP Get
+\begin{yamlbox}[title={HTTP Get example}]
+apiVersion: v1
+
+kind: Pod
+...
+spec:
+  containers:
+  - name: my-nginx
+    image: nginx:alpine
+    livenessProbe: # Define liveness probe
+      httpGet: # Check index.html on port 80
+        path: /index.html
+        port: 80
+      initialDelaySeconds: 15
+      timeoutSeconds: 2
+      periodSeconds: 5
+      failureThreshold: 1 # Allow 1 failure
+    readinessProbe: # Define readiness probe
+      httpGet: # Check index.html on port 80
+        path: /index.html
+        port: 80
+      initialDelaySeconds: 2
+      periodSeconds: 5 # Check every 5 secs
+\end{yamlbox}
+
+Example of probe using ExecAction
+
+\begin{yamlbox}[title={ExecAction example}]
+apiVersion: v1
+
+kind: Pod
+...
+spec:
+  containers:
+  - name: liveness
+    image: k8s.gcr.io/busybox
+    
+    args: # define args container
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30;
+      rm -rf /tmp/healthy; sleep 600;
+      
+    livenessProbe: # Define liveness probe
+      exec: # define action/cmd to exec
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5
+      periodSeconds: 5
+\end{yamlbox}
+
+
+% --------------------------------------------------
+% ARCHITECTURE OVERVIEW
+% --------------------------------------------------
+\section{architecture overview}
+
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_arch.drawio.pdf}
+\end{center}
+\textbullet\ a multi-master panel (3 to 5 nodes) where each master has access to the same worker nodes increases availability in case of failure of one master node; a master takes the role of leader \\
+\textbullet\ 
+
+% --------------------------------------------------
+% DECLARATIVE MODEL & DESIRED STATE
+% --------------------------------------------------
+\section{declarative model \& desired state}
+
+The \textbf{declarative model} describes what we want (\textbf{desired state}) in a manifest file (JSON or YAML format).\\
+
+The manifest file is posted to the API Server (Master node) and Kubernetes does whatever is necessary to get the \textbf{desired state}. K8s also supports \textbf{imperative model} where the desired state is reached by using a list of commands and actions to perform.\\
+
+Example: part of manifest file in YAML
+\begin{yamlbox}[title={Example: part of manifest file in YAML}]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: test
+spec:
+    replicas: 6
+    selector:
+        matchLabels:
+            app: ps-test
+    template:
+        spec:
+            containers:
+                - name: c1
+                  image: web1:1.3
+                  ports: 8080
+                  - containerPort
+                    ...
+\end{yamlbox}
+
+% --------------------------------------------------
+% DEPLOYMENT
+% --------------------------------------------------
+\section{deployment}
+
+The deployment controller is an object used for monitoring, management of upgrade, downgrade, and scaling of services (\textit{e.g.} pods) without any disruption or downtime. If a \textbf{desired state} has been specified, it will check continuously the actual state to fit the \textbf{desired state} (\textit{e.g.} the number of desired replicas for an application).\\
+
+The deployment controllers work with other controllers named the replica set controllers to manage the number of replicas.\\
+
+A ReplicaSet's purpose is to maintain a stable set of replica Pods running at any given time. As such, it is often used to guarantee the availability of a specified number of identical Pods.\\
+
+A ReplicaSet is a declarative way to manage pods. They act as a Pod controller: self-healing mechanism, ensure the requested number of of pods are available, provide fault-tolerance, can be used to scale Pods, relies on a pod template, no need to create pods directly, used by deployment.\\
+
+A Deployment is a declarative way to manage pods using a ReplicaSet. It manages pods: pods are managed using ReplicaSets, scales replicaSets (which scale pods), support zero-downtime updates by creating and destroying ReplicaSets, provides rollback functionality, creates a unique labelthat is assigned to the ReplicaSet and generated Pods, YAML is very similar to a ReplicaSet\\
+
+
+%\vspace{-1.5em}
+\begin{center}
+    \includegraphics[width=0.75\columnwidth]{images/k8s_deployA.drawio.pdf}
+\end{center}
+
+\begin{yamlbox}[title={file.deploy.yml}]
+apiVersion: apps/v1
+kind: Deployment
+metadata: # metadata about deployment
+  name: frontend
+  labels:
+    app: my-nginx
+    tier: frontend
+spec:
+  replicas: 3
+  selector: # template to use based on labels
+    matchLabels:
+      tier: frontend
+  template: # Template used to create pod
+    metadata:
+      labels:
+        tier: frontend
+    spec:
+      containers:
+      - name: my-nginx
+        image: nginx:alpine
+\end{yamlbox}
+
+
+Liveness and readiness can also be defined in a Deployment file.\\
+
+Create a deployment
+\begin{ttyenv}
+kubectl create -f file.deploy.yml --save-config
+kubectl apply -f file.deploy.yml
+\end{ttyenv}
+
+List all deployments and their labels
+\begin{ttyenv}
+kubectl get deployment --show-labels
+\end{ttyenv}
+
+Get all deployments with a specific label
+\begin{ttyenv}
+kubectl get deployment -l app=[label]
+\end{ttyenv}
+
+Delete a deployment
+\begin{ttyenv}
+kubectl delete deployment [deployname]
+\end{ttyenv}
+
+Scale the deployment Pods (to 5)
+\begin{ttyenv}
+kubectl scale deployment [deployname] \
+    --replicas=5
+\end{ttyenv}
+
+Scale with a YAML file
+\begin{ttyenv}
+kubectl scale deployment -f [file.deploy.yml] \
+    --replicas=5
+\end{ttyenv}
+
+Several options are available for deployments: rolling update, blue-green deployment, canary deployments, rollback.\\
+
+Zero-downtime deployments allow software updates to be deployed to production without impacting end users.\\
+
+% --------------------------------------------------
+% SERVICES
+% --------------------------------------------------
+\section{services}
+
+A service provides a single point of entry for accessing one or more pods. Different types of resources which can be used to ensures that pods are being deployed properly, that they are running properly, that the containers within them are healthy etc.\\
+
+Any new pods arrives (replacement, scale up/down) with new IPs which is challenging from a network perspective. Kubernetes gives Pods their own IP addresses and a single DNS name for a set of Pods, and can load-balance across them. The load balancing can be refined using labels.\\
+
+The role of services is to abstract Pod IP adresses from consumers, to load-balance between pods, to rely on labels to associate a Service with a Pod. Node's kube-proxy creates a virtual IP for Services using Layer 4 (TCP/UDP over IP). Services are not ephemeral and creates endpoints which sit between a Service and Pod.\\
+
+Services can be defined in different ways:
+\textbullet\ \textbf{ClusterIP:} expose the service on a cluster-internal IP (default)\\
+\textbullet\ \textbf{NodePort:} expose the service on each Node's IP at a static port\\
+\textbullet\ \textbf{LoadBalancer:} provision an external IP to act as a load balancer for the service\\
+\textbullet\ \textbf{ExternalName:} maps a service to a DNS name\\
+
+ClusterIP Service: Service IP is exposed internally within the cluster, only pods within the cluster can talk to the service, allows pods to talk to other pods\\
+
+NodePort Service: allocates a port from a range (default is 30000-32767), each node proxies the allocated port\\
+
+LoadBalancer: useful when combined with a cloud provider's load balancer, NodePort and ClusterIP services are created, each node proxies the allocated port\\
+
+ExternalName: service that acts as an alias for an external service, allows a service to act as the proxy for an external service, external service details are hidden from cluster (easier to change)\\
+
+Listen on port 8080 locally and forawrd to port 80 in pod
+\begin{ttyenv}
+kubectl port-forward pod/[podname] 8080:80
+\end{ttyenv}
+
+Listen on port 8080 locally and forawrd to deployment's pod
+\begin{ttyenv}
+kubectl port-forward deployment/[deploy] 8080[:80]
+\end{ttyenv}
+
+Listen on port 8080 locally and forawrd to service's pod
+\begin{ttyenv}
+kubectl port-forward service/[servicename] 8080
+\end{ttyenv}
+
+Defining a service with YAML
+\begin{yamlbox}[title={Defining a service}]
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+    
+spec:
+  type:
+  selector:
+    app: nginx
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80 
+\end{yamlbox}
+
+Connecting to a Service by it's DNS name
+\begin{yamlbox}[title={Connecting a service}]
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  ...
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  ...
+\end{yamlbox}
+
+Creating a NodePort Service
+\begin{yamlbox}[title={Creating a NodePort Service}]
+apiVersion: v1
+kind: Service
+metadata:
+  ...
+spec:
+
+  type: NodePort
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 31000 # Optional
+\end{yamlbox}
+
+Creating a LoadBalancer Service
+\begin{yamlbox}[title={Creating a LoadBalancer Service}]
+apiVersion: v1
+kind: Service
+metadata:
+  ...
+spec:
+
+  type: LoadBalancer
+  selector:
+    app: nginx
+  ports:
+  - port: 80
+    targetPort: 80
+\end{yamlbox}
+
+Creating an ExternalName Service
+\begin{yamlbox}[title={Creating an ExternalName Service}]
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-service
+  # Other Pods can use this FQDN to 
+  # access the external service
+spec:
+  type: ExternalName
+  externalName: api.acmecorp.com 
+  # Service will proxy to FQDN
+  
+  ports:
+  - port: 9000
+\end{yamlbox}
+
+Creating a service
+\begin{ttyenv}
+kubectl create -f file.service.yml
+\end{ttyenv}
+
+Creating or updating a service
+\begin{ttyenv}
+kubectl apply  -f file.service.yml
+\end{ttyenv}
+
+Deleting a service
+\begin{ttyenv}
+kubectl delete  -f file.service.yml
+\end{ttyenv}
+
+Shell into a Pod and test a URL
+\begin{ttyenv}
+kubectl exec [podname] -- curl -s http://podIP
+\end{ttyenv}
+
+Install and use curl (for Alpine)
+\begin{ttyenv}
+kubectl exec [podname] -it sh
+> apk add curl
+> curl -s http://podIP
+\end{ttyenv}
+
+% --------------------------------------------------
+% API & API SERVER
+% --------------------------------------------------
+\section{api \& API Server}
+
+\begin{center}
+    \includegraphics[width=0.95\columnwidth]{images/k8s_api.drawio.pdf}
+\end{center}
+
+K8s API Server is a control plane feature that exposes the API over a secure RESTful endpoint.\\
+
+It validates and configures data for the API objects which include pods, services, replication controllers, and others. The API Server services REST operations and provides the front-end to the cluster's shared state through which all other components interact.\\
+
+% --------------------------------------------------
+% KUBECTL
+% --------------------------------------------------
+\section{kubectl command}
+
+Check Kubernetes version
+\begin{ttyenv}
+kubectl version
+\end{ttyenv}
+
+View cluster information
+\begin{ttyenv}
+kubectl cluster-info
+\end{ttyenv}
+
+Retrive information about kubernetes Pods, deployments, services and more
+\begin{ttyenv}
+kubectl get all
+\end{ttyenv}
+
+Simple way to create a deployment for a pod
+\begin{ttyenv}
+kubectl run [container] --image=[image]
+\end{ttyenv}
+
+Forward a port to allow external access
+\begin{ttyenv}
+kubectl port-forward [pod] [ports]
+\end{ttyenv}
+
+Expose a port for a deployment/pod
+\begin{ttyenv}
+kubectl expose ...
+\end{ttyenv}
+
+Create a resource
+\begin{ttyenv}
+kubectl create [resource]
+\end{ttyenv}
+
+Create or modify a resource
+\begin{ttyenv}
+kubectl apply [resource]
+\end{ttyenv}
+
+% --------------------------------------------------
+% WEB UI DASHBOARD
+% --------------------------------------------------
+%\section{web ui dashboard}
+
+%Web UI Dashboard povides a user interface to view Kubernetes resources.\\
+
+%Steps to enable the UI Dashboard:\\
+%\textbullet\ \verb|kubectl apply [dashboard-yaml-url]|\\
+%\textbullet\ \verb|kubectl describe secret -n kube-system|\\
+%\textbullet\ locate the kubernetes.io/service-account-token and copy the token\\
+%\textbullet\ visit the dashboard URL and login using the token
+
+\rflicense
+
+\end{document}

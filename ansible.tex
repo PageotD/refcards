@@ -1,0 +1,402 @@
+\documentclass{refcard}
+
+\title{ansible}
+\logo{ansible_logo.png}
+\theme{default}
+
+\begin{document}
+\maketitle
+
+% --------------------------------------------------
+% WHAT IS ANSIBLE ?
+% --------------------------------------------------
+\section{what is ansible?}
+
+\textbullet\ created in 2012 by Michael DeHann (Cobler) and continued by ReHat since 2015\\
+\textbullet\ infrastructure as code (IaC) + configuration deployment + installations\\
+\textbullet\ based on python\\
+\textbullet\ agentless orchestrator, the remote servers push informations \\
+\textbullet\ simplicity related to SSH\\
+\textbullet\ easy to integrate in CI/CD\\
+\textbullet\ simplicity related to YAML\\
+\textbullet\ many modules (ansible galaxy)\\
+\textbullet\ can be installed via sources, packages or python module (pip)\\
+\textbullet\ templating based on jinja2 (python)\\
+
+% --------------------------------------------------
+% BASIC COMPONENTS
+% --------------------------------------------------
+\section{basic components}
+
+\textbullet\ \textbf{control node:} dedicated machine with Ansible installed which allows to deploy via ssh to other machines \\
+\textbullet\ \textbf{managed node:} network devices managed with Ansible; also known as hosts\\
+\textbullet\ \textbf{inventory:} defines the variables and the hosts (and groups of hosts) upon which commands, modules, and tasks in a playbook operate; can be static (file) or dynamic (python script)\\
+\textbullet\ \textbf{variables:} used to manage differences between systems\\
+\textbullet\ \textbf{playbook:} used to declare configurations, orchestrate steps of any manual ordered process (on multiple sets of machines, in a defined order) and launch tasks synchronously or asynchronously\\
+\textbullet\ \textbf{groups:} in an inventory, machines can be grouped (webserver, database...); several levels can be created (parents/childrens); root group=all\\
+\textbullet\ \textbf{group vars:} variables specific to a group and defined in the main inventory file or in a specific repository known by Ansible\\ 
+\textbullet\ \textbf{host vars:} variables specific to a server; overload higher variables\\
+\textbullet\ \textbf{tasks:} units of action in Ansible\\
+\textbullet\ \textbf{modules:} units of code, dedicated to a particuler use, which can be invoked by a task\\
+\textbullet\ \textbf{roles:} a reusable set of coordinated actions which automatically load vars, files, tasks, handlers, and other Ansible artifacts based on a known file structure\\
+\textbullet\ \textbf{collections:} a distribution format for Ansible content that can include playbooks, roles, modules, and plugins
+
+% --------------------------------------------------
+% CONFIGURATION FILE
+% --------------------------------------------------
+\section{configuration file}
+
+\textbullet\ core of the ansible software which governs the behavior of all interactions performed by the control node\\
+\textbullet\ the default \textit{ansible.cfg} file is located in \verb|/etc/ansible/ansible.cfg| (can also be placed in the playbook or by specifying a location in \verb|ANSIBLE_CONFIG| variable\\
+\textbullet\ \verb|ansible-config| command allows to see all the configuration settings available, their defaults, how to set them and where their current value comes from
+
+\begin{ttyenv}
+ansible-config view # config file used
+\end{ttyenv}
+
+\begin{ttyenv}
+ansible-config list # show all config variables
+\end{ttyenv}
+
+% --------------------------------------------------
+% INVENTORY
+% --------------------------------------------------
+\section{inventory}
+
+Setup hosts by editing the \textit{hosts} file
+\begin{ttyenv}
+sudo nano /etc/ansible/hosts
+\end{ttyenv}
+
+Check connection of a host, a server or a group of server
+\begin{ttyenv}
+ansible -m ping [host/server/servergroup name]
+\end{ttyenv}
+
+Some common patterns
+\begin{table}[!h]
+    \centering
+    \sffamily
+    \begin{tabular}{|l|l|}
+        \hline
+        Description   & Pattern(s) \\
+        \hline
+        All hosts              & all (or *) \\
+        One host               & host1      \\
+        Multiple hosts         & host1:host2 (or host1,host2) \\
+        One group              & webservers                   \\
+        Multiple groups	       & webservers:dbservers         \\
+        Excluding groups       & webservers:!atlanta          \\
+        Intersection of groups & webservers:\&staging \\
+        \hline
+    \end{tabular}
+    %\caption{Caption}
+    %\label{tab:my_label}
+\end{table}
+
+Example of a \verb|hosts| file (static inventory) in \verb|INI| format
+\begin{yamlbox}
+mail.example.com
+
+[webservers]
+foo.example.com
+bar.example.com
+
+[dbservers]
+one.example.com
+two.example.com
+three.example.com
+\end{yamlbox}
+
+Example of a \verb|hosts| file (static inventory) in \verb|YAML| format
+\begin{yamlbox}
+all:
+  hosts:
+    mail.example.com:
+  children:
+    webservers:
+      hosts:
+        foo.example.com:
+        bar.example.com:
+    dbservers:
+      hosts:
+        one.example.com:
+        two.example.com:
+        three.example.com:
+\end{yamlbox}
+
+
+Output all hosts info in JSON (default) or YAML
+\begin{ttyenv}
+ansible-inventory -i [inventory] --list
+ansible-inventory -i [inventory] --list --yaml
+\end{ttyenv}
+
+Output all hosts info in a compact graph format
+\begin{ttyenv}
+ansible-inventory -i [inventory] --graph
+\end{ttyenv}
+
+% --------------------------------------------------
+% PLAYBOOK
+% --------------------------------------------------
+\section{playbook}
+
+Run a playbook
+\begin{ttyenv}
+ansible-playbook [playbook].yml
+\end{ttyenv}
+
+Specify inventory host path or comma separated host list
+\begin{ttyenv}
+ansible-playbook -i [inventory] [playbook].yml 
+\end{ttyenv}
+
+Limit to specific hosts or host groups
+\begin{ttyenv}
+ansible-playbook -l [hosts] [playbook].yml 
+\end{ttyenv}
+
+Connect as specific user
+\begin{ttyenv}
+ansible-playbook -u [user] [playbook].yml 
+\end{ttyenv}
+
+Run operations with become (sudo)
+\begin{ttyenv}
+ansible-playbook -b [playbook].yml 
+\end{ttyenv}
+
+Check/dry-run
+\begin{ttyenv}
+ansible-playbook -C [playbook].yml 
+\end{ttyenv}
+
+Show the differences in changed files (or templates)
+\begin{ttyenv}
+ansible-playbook -D [playbook].yml 
+\end{ttyenv}
+
+Show prompt for the vault password
+\begin{ttyenv}
+ansible-playbook --ask-vault [playbook].yml 
+\end{ttyenv}
+
+Overload variables
+\begin{ttyenv}
+ansible-playbook [playbook].yml -e var=value
+\end{ttyenv}
+
+Only run plays and tasks tagged with these values
+\begin{ttyenv}
+ansible-playbook [playbook].yml -t [tags]
+\end{ttyenv}
+
+Step-by-step run
+\begin{ttyenv}
+ansible-playbook [playbook].yml --step
+\end{ttyenv}
+
+Start run at a specific task
+\begin{ttyenv}
+ansible-playbook [playbook].yml \
+ --start-at-task [task]
+\end{ttyenv}
+
+List all the tags
+\begin{ttyenv}
+ansible-playbook [playbook].yml --list-tags
+\end{ttyenv}
+
+List all the tasks
+\begin{ttyenv}
+ansible-playbook [playbook].yml --list-tasks
+\end{ttyenv}
+
+Example of playbook
+\begin{yamlbox}
+---
+- name: Update web servers
+  hosts: webservers
+  remote_user: root
+
+  tasks:
+  - name: Ensure apache latest version
+    ansible.builtin.yum:
+      name: httpd
+      state: latest
+  - name: Write the apache config file
+    ansible.builtin.template:
+      src: /srv/httpd.j2
+      dest: /etc/httpd.conf
+
+- name: Update db servers
+  hosts: databases
+  remote_user: root
+
+  tasks:
+  - name: Ensure postgresql latest version
+    ansible.builtin.yum:
+      name: postgresql
+      state: latest
+  - name: Ensure that postgresql is started
+    ansible.builtin.service:
+      name: postgresql
+      state: started
+\end{yamlbox}
+
+% --------------------------------------------------
+% ROLES
+% --------------------------------------------------
+\section{roles}
+
+% --------------------------------------------------
+% FILES MODULE
+% --------------------------------------------------
+\section{files module}
+
+The \textbf{files module} allows to set attributes of files, symlinks or directories. Alternatively, it can be used to remove files, symlinks or directories. Among the many options of the module, the most commonly used are:\\
+\textbullet\ \textbf{attribute:} attributes the resulting file or directory should have\\
+\textbullet\ \textbf{force:} force the creation of the symlinks\\
+\textbullet\ \textbf{group/owner:} Name of the group/owner that should own the file/directory\\
+\textbullet\ \textbf{mode:} the permissions the resulting file or directory should have\\
+\textbullet\ \textbf{path:} localization\\
+\textbullet\ \textbf{recurse:} recursively set the specified file attributes on directory contents
+\textbullet\ \textbf{src:} path of the file to link to\\
+\textbullet\ \textbf{state:} allows to create, to delete, to link or to check files and directories depending on the paramater (state=absent/directory/file/hard/link/touch)\\
+
+\begin{yamlbox}
+---
+- name: myplaybook
+  hosts: common
+  become: yes
+    
+  tasks:
+  - name: create directory /tmp/myrep/subrepo1
+    file:
+      path: "/tmp/myrepo/subrepo1"
+      recurse: yes
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+  - name: create directory /tmp/myrep/subrepo2
+    file:
+      path: "/tmp/myrepo/subrepo2"
+      recurse: yes
+      state: directory
+      owner: root
+      group: root
+      mode: 0755
+  - name: create /tmp/myrep/myfile.txt
+    file: 
+      path: "/tmp/myrep/myfile.txt"
+      state: touch
+      owner: root
+      group: root
+      mode: 0755
+  - name: check /tmp/myrep/myfile.txt
+    file: 
+      path: "/tmp/myrep/myfile.txt"
+      state: file
+      owner: root
+      group: root
+  - name: create symbolic link
+    file:
+      src: "/tmp/myreop/subrepo1"
+      dest: "/tmp/symlink"
+      state: link
+      owner: root
+      group: root
+      mode: 0755
+  - name: delete /tmp/myrep/subrepo2
+    file:
+      src: "/tmp/myrep/subrepo2"
+      state: absent
+      mode: 0755
+\end{yamlbox}
+
+% --------------------------------------------------
+% USER MODULE
+% --------------------------------------------------
+\section{user module}
+
+The \textbf{user module} allows to manage user accounts and user attributes. The most useful options used are:\\
+\textbullet\ \textbf{append:} if yes, add the user to the groups specified in groups; if no, user will only be added to the groups specified in groups, removing them from all other groups\\
+\textbullet\ \textbf{comment:} optionally sets the description of user account\\
+\textbullet\ \textbf{create\_home:} Unless set to no, a home directory will be made for the user when the account is created or if the home directory does not exist\\
+\textbullet\ \textbf{expires:} set an expiration date for the user account\\
+\textbullet\ \textbf{force:} this only affects \verb|state=absent|, it forces removal of the user and associated directories on supported platforms\\
+\textbullet\ \textbf{generate\_ssh\_key:} to generate a SSH key for the user, this will not overwrite an existing SSH key\\
+\textbullet\ \textbf{group:} optionally sets the user's primary group (takes a group name)\\
+\textbullet\ \textbf{groups:} list of groups user will be added to\\
+\textbullet\ \textbf{home:} optionally set the user's home directory\\
+\textbullet\ \textbf{local:} forces the use of "local" command alternatives on platforms that implement it (useful in environments that use centralized authentication when you want to manipulate the local users)\\
+\textbullet\ \textbf{move\_home:} attempt to move the user's old home directory to the specified directory if it isn't there already and the old home exists\\
+\textbullet\ \textbf{name:} name of the user to create, remove or modify\\
+\textbullet\ \textbf{password:} optionally set the user's password to this crypted value (hash)\\
+\textbullet\ \textbf{password\_lock:} lock the user's password\\
+\textbullet\ \textbf{remove:} this only affects \verb|state=absent|, it attempts to remove directories associated with the user\\
+\textbullet\ \textbf{remove:} optionally set the user's shell\\
+\textbullet\ \textbf{skeleton:} optionally set a home skeleton directory (requires \verb|create\_home| option)\\
+\textbullet\ \textbf{ssh\_key\_bits:} optionally specify number of bits in SSH key to create\\
+\textbullet\ \textbf{ssh\_key\_comment:} optionally define the comment for the SSH key\\
+\textbullet\ \textbf{ssh\_key\_file:} optionally specify the SSH key filename; if this is a relative filename then it will be relative to the user's home directory (this parameter defaults to \verb|.ssh/id_rsa|)\\
+\textbullet\ \textbf{ssh\_key\_passphrase:} set a passphrase for the SSH key\\
+\textbullet\ \textbf{ssh\_key\_type:} optionally specify the type of SSH key to generate (default rsa)\\
+\textbullet\ \textbf{state:} whether the account should exist or not, taking action if the state is different from what is stated\\
+\textbullet\ \textbf{system:} when creating an account \verb|state=present|, setting this to yes makes the user a system account\\
+\textbullet\ \textbf{uid:} optionally sets the UID of the user\\
+\textbullet\ \textbf{update\_password:} \verb|always| will update passwords if they differ, \verb|on_create| will only set the password for newly created users\\
+
+\begin{yamlbox}
+---
+# creating a user with password, uid and groups
+- name: create_user_playbook
+  hosts: common
+  become: yes
+  
+  tasks:
+  
+  - name: creation of a user
+    user:
+      name: thedude
+      state: present
+      uid: 1200
+      groups: sudo
+      generate_ssh_key: yes
+      password: "{{'password' | \
+          password_hash('sha512')}}"
+    register: __user_creation # it's a var
+  
+  - name: debug user # output user info
+    debug:
+      var:: __user_creation
+  
+  - name: remove user
+    user:
+      name: thedude
+      state: absent
+\end{yamlbox}
+
+% --------------------------------------------------
+% REGISTER & STAT MODULE
+% --------------------------------------------------
+\section{register \& stat module}
+
+% --------------------------------------------------
+% VARIABLES
+% --------------------------------------------------
+\section{variables}
+
+Main variable groups by hierarchic/precedence order:
+\begin{enumerate}
+    \item configuration settings\vspace{-0.75em}
+    \item command-line options (inventory)\vspace{-0.75em}
+    \item playbook keywords\vspace{-0.75em}
+    \item role/task variables
+\end{enumerate}
+
+\rflicense
+
+\end{document}

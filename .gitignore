@@ -1,0 +1,8 @@
+# Files
+.ash_history
+*.listing
+*.pdf
+*.xdv
+
+# Folders
+_minted*/*

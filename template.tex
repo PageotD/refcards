@@ -1,0 +1,247 @@
+\documentclass{refcard}
+
+\title{awesome \\template}
+\logo{docker_logo.png}
+\theme{default}
+
+\begin{document}
+\maketitle
+
+% --------------------------------------------------
+% AVALAIBLE THEMEs
+% --------------------------------------------------
+\section{available themes}
+
+
+% --------------------------------------------------
+% RUN CONTAINERS
+% --------------------------------------------------
+
+\section{run containers}
+
+Start a new container from an image%
+\begin{ttyenv}
+docker run -n [container] [image]
+\end{ttyenv}
+
+
+Assign a name to the container (at start)
+\begin{ttyenv}
+docker run -n [container] [image]
+\end{ttyenv}
+
+Start container in background (detached mode)
+\begin{ttyenv}
+docker run -d [image]
+\end{ttyenv}
+
+Map all ports
+\begin{ttyenv}
+docker run -P [image]
+\end{ttyenv}
+
+Map a specific port
+\begin{ttyenv}
+docker run -p [host_port:container_port] [image]
+\end{ttyenv}
+
+Map a specific directory
+\begin{ttyenv}
+docker run -v [hostdir:target_dir] [image]
+\end{ttyenv}
+
+Keep container interactive and allocate a pseudo-tty (\textit{i.e} to run bash)
+\begin{ttyenv}
+docker run -it [image] [executable] 
+\end{ttyenv}
+
+Stop a running container
+\begin{ttyenv}
+docker stop [container]
+\end{ttyenv}
+
+Start a stopped container
+\begin{ttyenv}
+docker start [container]
+\end{ttyenv}
+
+Start a shell inside a running container
+\begin{ttyenv}
+docker exec -it [container] [executable]
+\end{ttyenv}
+
+% --------------------------------------------------
+% MANAGE CONTAINERS
+% --------------------------------------------------
+
+\section{manage containers}
+
+Show the list of running containers
+\begin{ttyenv}
+docker ps
+\end{ttyenv}
+
+Show the list of all containers
+\begin{ttyenv}
+docker ps -a
+\end{ttyenv}
+
+Rename a container
+\begin{ttyenv}
+docker rename [old_container] [new_container]
+\end{ttyenv}
+
+Delete a container
+\begin{ttyenv}
+docker rm [container]
+\end{ttyenv}
+
+Copy a file from container to host
+\begin{ttyenv}
+docker cp [container]:[source] [target]
+\end{ttyenv}
+
+Copy a file from host to container
+\begin{ttyenv}
+docker cp [target] [container]:[source] 
+\end{ttyenv}
+\vspace{4em}
+
+% --------------------------------------------------
+% MANAGE CONTAINERS
+% --------------------------------------------------
+
+\section{manage images}
+
+Download an image with an (optional tag)
+\begin{ttyenv}
+docker pull [image][:tag]
+\end{ttyenv}
+
+Upload an image with an (optional tag)
+\begin{ttyenv}
+docker push [image][:tag]
+\end{ttyenv}
+
+Show a list of all image
+\begin{ttyenv}
+docker images
+\end{ttyenv}
+
+Delete an image
+\begin{ttyenv}
+docker rmi [image]
+\end{ttyenv}
+
+Delete all unused images
+\begin{ttyenv}
+docker images prune -a
+\end{ttyenv}
+
+Create an image from a container
+\begin{ttyenv}
+docker commit [container]
+\end{ttyenv}
+
+Build an image from a Dockerfile (in a directory)
+\begin{ttyenv}
+docker build [dir]
+\end{ttyenv}
+
+Tag an image
+\begin{ttyenv}
+docker [image] [image]:[tag]
+\end{ttyenv}
+
+Build and tag an image from a Dockerfile
+\begin{ttyenv}
+docker build -t [image]:[tag] [dir]
+\end{ttyenv}
+
+Save an image to a \verb|tar| file
+\begin{ttyenv}
+docker save [image] [tar_file]
+\end{ttyenv}
+
+Load an image from a \verb|tar| file
+\begin{ttyenv}
+docker load -i [tar_file]
+\end{ttyenv}
+
+% --------------------------------------------------
+% MANAGE CONTAINERS
+% --------------------------------------------------
+
+\section{inspect}
+
+Show the logs of a container
+\begin{ttyenv}
+docker logs [container]
+\end{ttyenv}
+
+Show stats of running containers
+\begin{ttyenv}
+docker stats
+\end{ttyenv}
+
+Show processes of a container
+\begin{ttyenv}
+docker top [container]
+\end{ttyenv}
+
+Get detailed info of a construct
+\begin{ttyenv}
+docker inspect [construct]
+\end{ttyenv}
+
+Show modified files in a container
+\begin{ttyenv}
+docker diff [container]
+\end{ttyenv}
+
+Show mapped ports of a container
+\begin{ttyenv}
+docker port [container]
+\end{ttyenv}
+
+Show the history of an image
+\begin{ttyenv}
+docker history [image]
+\end{ttyenv}
+
+\clearpage
+\newpage
+
+% --------------------------------------------------
+% DOCKERFILE
+% --------------------------------------------------
+
+\section{dockerfile}
+
+Basic structure
+\begin{dockerbox}[title={Dockerfile example}]
+FROM [image]:[tag]  # base image
+MAINTAINER [name]   # name of the maintainer
+
+COPY [dir]          # copy dir to container
+WORKDIR [dir]       # define working dir
+RUN [command]       # build/exec command
+
+CMD [command]       # command to run in container
+\end{dockerbox}
+
+Example
+\begin{dockerbox}[title={docker example}]
+FROM debian:jessie  
+MAINTAINER TheDude  
+
+COPY ./myapp         
+WORKDIR /myapp       
+RUN apt-get update && apt-get upgrade
+
+CMD python /myapp/myscript.py  
+\end{dockerbox}
+
+\rflicense
+
+\end{document}

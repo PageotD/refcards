@@ -1,0 +1,315 @@
+\documentclass{refcard}
+
+\title{git}
+\logo{git_logo.png}
+\theme{default}
+
+\begin{document}
+
+\maketitle
+
+\section{WHAT IS GIT?}
+
+Git is a free and open source distributed version control system designed to handle everything from small to very large projects with speed and efficiency.\\
+
+Git was created by Linus Torvalds in 2005 for development of the Linux kernel, with other kernel developers contributing to its initial development.\\
+
+% --------------------------------------------------
+% DEFINITIONS
+% --------------------------------------------------
+\section{some keywords}
+
+\textbullet\ \textbf{repository:} where the entire snapshot of a project is stored\\
+\textbullet\ \textbf{working directory:} local working copy of a project\\
+\textbullet\ \textbf{commit:} latest snapshot of a project\\
+\textbullet\ \textbf{branch:} parallel line of development\\
+\textbullet\ \textbf{tag:} reference to a specific commit\\
+\textbullet\ \textbf{fetch:} download and copy branch’s files to the working directory\\
+\textbullet\ \textbf{push:} update a remote branch with the commits made to the current branch\\
+%Git is an Open Source Distributed Version Control System originally developed by Linus Torvald.
+
+% --------------------------------------------------
+% CONFIGURE
+% --------------------------------------------------
+\section{configure}
+
+% >> user name and mail
+Configure user name and email adress:
+\begin{ttyenv}
+git config --global user.name "user_name"
+git config --global user.email "user@email"
+\end{ttyenv}
+
+% >> editor
+Configure default editor (nano, vim, notepad++, etc.)
+\begin{ttyenv}
+git config --global core.editor <editor>
+\end{ttyenv}
+
+% >> autocorrect
+Set up auto-correct (the integer is the delay after which the suggested command will be executed)
+\begin{ttyenv}
+git config --global help.autocorrect 5
+\end{ttyenv}
+
+% >> output color
+Set up terminal output color
+\begin{ttyenv}
+git config --global color.ui auto
+\end{ttyenv}
+
+% >> Win/Linux file format
+%Set up automatic conversion of CRLF endlines to LF endlines
+%\begin{ttyenv}
+%git config --global core.autocrlf input
+%\end{ttyenv}
+
+% >> List
+List all variables set in config file, along with their values
+\begin{ttyenv}
+git config --global --list
+\end{ttyenv}
+
+% >> Remove
+Remove the line matching the key (\textit{i.e.} user.name) from config file
+\begin{ttyenv}
+git config --global --unset [key]
+\end{ttyenv}
+
+% --------------------------------------------------
+% CREATE & GET
+% --------------------------------------------------
+\section{create \& get}
+
+Initialize an existing \textbf{working directory} as a \textbf{remote repository}
+\begin{ttyenv}
+git init
+\end{ttyenv}
+
+Clone a project from a \textbf{remote repository}
+\begin{ttyenv}
+git clone [git_repo_url]
+\end{ttyenv}
+ 
+
+% --------------------------------------------------
+% CHANGE
+% --------------------------------------------------
+
+\section{change}
+
+Show the status of the \textbf{working directory} (tracked and untracked files)
+\begin{ttyenv}
+git status
+\end{ttyenv}
+
+Stage changes in files
+\begin{ttyenv}
+git add [files]
+\end{ttyenv}
+
+Unstage files but keep files modifications
+\begin{ttyenv}
+git reset <files>
+\end{ttyenv}
+
+\textbf{Commit} staged files
+\begin{ttyenv}
+git commit -m "commit_message"
+\end{ttyenv}
+
+\textbf{Commit} staged and tracked files
+\begin{ttyenv}
+git commit -am "commit_message"
+\end{ttyenv}
+
+Change an existing file path and stage the move
+\begin{ttyenv}
+git mv <source> <destination>
+\end{ttyenv}
+
+Delete a file from project and stage the removal for \textbf{commit}
+\begin{ttyenv}
+git rm <files>
+\end{ttyenv}
+
+Reset everything to the latest \textbf{commit}
+\begin{ttyenv}
+git reset --hard
+\end{ttyenv}
+
+Create a new \textbf{commit} and revert changes from the specified \textbf{commit}
+\begin{ttyenv}
+git revert [commit sha]
+\end{ttyenv}
+
+Remove untracked files from the \textbf{working directory} (\verb|-n| for dry-run)
+\begin{ttyenv}
+git clean
+\end{ttyenv}
+
+% --------------------------------------------------
+% STASH
+% --------------------------------------------------
+\section{stash}
+
+Save changes and return to the previous \textbf{commit} status
+\begin{ttyenv}
+git stash
+\end{ttyenv}
+
+List the stored stash
+\begin{ttyenv}
+git stash list
+\end{ttyenv}
+
+Apply back the saved stash
+\begin{ttyenv}
+git stash apply
+\end{ttyenv}
+
+Same as apply but remove the stash from the list
+\begin{ttyenv}
+git stash pop
+\end{ttyenv}
+
+Discard the changes from top of stash stack
+\begin{ttyenv}
+git stash drop
+\end{ttyenv}
+
+% --------------------------------------------------
+% BRANCH
+% --------------------------------------------------
+\section{branch}
+
+Create a \textbf{branch} (locally)
+\begin{ttyenv}
+git branch [branch_name]
+\end{ttyenv}
+
+Switch to a \textbf{branch}
+\begin{ttyenv}
+git checkout [branch_name]
+\end{ttyenv}
+
+Rename a \textbf{branch}
+\begin{ttyenv}
+git branch -m [new_branch_name]
+\end{ttyenv}
+
+Merge branchB into branchA 
+\begin{ttyenv}
+git checkout [branchA]
+git merge [branchB]
+\end{ttyenv}
+
+Recover deleted \textbf{commit}
+\begin{ttyenv}
+git branch [branch_name] [commit]
+\end{ttyenv}
+
+Delete a \textbf{branch}
+\begin{ttyenv}
+git branch -d [branch_name]
+\end{ttyenv}
+
+% --------------------------------------------------
+% INSPECT
+% --------------------------------------------------
+\section{inspect}
+
+List \textbf{commit} history of current branch for the last n commits
+\begin{ttyenv}
+git log [-n count]
+\end{ttyenv}
+
+Show the \textbf{commit} history for the current \textbf{branch}
+\begin{ttyenv}
+git log [--graph --oneline --all --decorate]
+\end{ttyenv}
+
+Show the \textbf{commits} on branchA that are not on branchB
+\begin{ttyenv}
+git log branchA..branchB
+\end{ttyenv}
+
+Show the changes to files not yet staged
+\begin{ttyenv}
+git diff
+\end{ttyenv}
+
+Show the changes to staged files
+\begin{ttyenv}
+git diff --cached
+\end{ttyenv}
+
+Show all staged and unstaged file changes
+\begin{ttyenv}
+git diff HEAD
+\end{ttyenv}
+
+Show the changes between two \textbf{commit}
+\begin{ttyenv}
+git diff commit1 commit2
+\end{ttyenv}
+
+Show the diff of what is in branchA but not in branchB
+\begin{ttyenv}
+git diff branchA..branchB
+\end{ttyenv}
+
+% --------------------------------------------------
+% TAG
+% --------------------------------------------------
+\section{tag}
+
+List all \textbf{tags}
+\begin{ttyenv}
+git tag
+\end{ttyenv}
+
+Create a \textbf{tag} object named name for current \textbf{commit}
+\begin{ttyenv}
+git tag -a [tag_name]
+\end{ttyenv}
+
+Create a \textbf{tag} object named name for a specific \textbf{commit}
+\begin{ttyenv}
+git tag -a [tag_name] [commit_sha]
+\end{ttyenv}
+
+Delete a \textbf{tag} from \textbf{working directory}
+\begin{ttyenv}
+git tag -d [tag_name]
+\end{ttyenv}
+
+
+% --------------------------------------------------
+% SYNCHRONIZE
+% --------------------------------------------------
+\section{synchronize}
+
+\textbf{Fetch} changes from the \textbf{remote repository}, but not update tracking \textbf{branches}
+\begin{ttyenv}
+git fetch [remote]
+\end{ttyenv}
+
+\textbf{Fetch} changes from the \textbf{remote repository} and merge current \textbf{branch} with its upstream
+\begin{ttyenv}
+git pull [remote]
+\end{ttyenv}
+
+Transmit local \textbf{branch commits} to the \textbf{remote repository}, use \textbf{tags} option to push \textbf{tags}
+\begin{ttyenv}
+git push [--tags] [remote]
+\end{ttyenv}
+
+Push local \textbf{branch} to \textbf{remote repository}
+\begin{ttyenv}
+git push -u [remote] [branch]
+\end{ttyenv}
+
+\rflicense
+
+\end{document}
