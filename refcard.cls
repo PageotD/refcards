@@ -123,6 +123,8 @@
 \newcommand{\theme}[1]{
     % Default theme
     \ifthenelse{\equal{#1}{default}}{\colorlet{xctheme}{aluminium5}}{}
+    % Project theme
+    \ifthenelse{\equal{#1}{project}}{\colorlet{xctheme}{chameleon3}}{}
 }
 
 
@@ -266,6 +268,7 @@
 % Listing environment for Dockerfiles
 \newtcblisting{dockerbox}[1][]{%
   #1,
+  fonttitle=\footnotesize	,
   listing only,%
   colback=aluminium5!10,%
   breakable,%
@@ -290,6 +293,7 @@
 % Listing environment for YAML files
 \newtcblisting{yamlbox}[1][]{%
   #1,
+  fonttitle=\footnotesize	,
   listing only,%
   colback=aluminium5!10,%
   breakable,%

@@ -384,6 +384,205 @@ The \textbf{user module} allows to manage user accounts and user attributes. The
 % --------------------------------------------------
 \section{register \& stat module}
 
+The stat module allows to retrieve facts from files or repositories. It takes some important parameters:
+\textbullet\ \textbf{path:} path to the file or repository to get the facts of\\
+\textbullet\ \textbf{follow:} whether to follow symbolic links\\
+\textbullet\ \textbf{get\_checksum:} whether to return a checksum of the file\\
+\textbullet\ \textbf{checksum\_algorithm:} algorithm to determine checksum of file\\
+\textbullet\ \textbf{get\_mine:} Use file magic and return data about the nature of the file\\
+
+\begin{yamlbox}[title={playbook register/stat}]
+---
+- name: playbook-name
+  hosts: all
+  become: yes
+  tasks:
+  - name: create file nobody.txt
+    file:
+      path: /tmp/file01.txt
+      state: touch
+      owner: userA
+  - name: check stat
+    stat:
+      path: /tmp/file01.txt
+    register: __stat_file01
+  - name: Show register
+    debug:
+      var: __stat_file01 
+  - name: Show message if file01 exists
+    debug:
+      msg: "File exists ? {{__stat_file01.stat.exists}}"
+  - name: create a repository if file01 exists
+    file:
+      path: /tmp/repo01
+      state: directory
+    when: __stat_file01.stat.exists == True
+\end{yamlbox}
+
+% --------------------------------------------------
+% REGISTER & STAT MODULE
+% --------------------------------------------------
+\section{loops}
+
+List of some available loops:
+\textbullet\ \textbf{with\_items:} list of items\\
+\textbullet\ \textbf{with\_nested:} composes a list of nested elements of other lists\\
+\textbullet\ \textbf{with\_dict:} return key-value pair items from dictionaries\\
+\textbullet\ \textbf{with\_fileglob:} list files matching a pattern\\
+\textbullet\ \textbf{with\_filetree:} recursively match all files in a directory tree\\
+\textbullet\ \textbf{with\_together:} creates a list with the iterated elements of the supplied lists\\
+\textbullet\ \textbf{with\_sequence:} generate a list based on a number sequence\\
+\textbullet\ \textbf{with\_random\_choice:} return random elements from list\\
+\textbullet\ \textbf{with\_first\_found:} return first file found from list\\
+\textbullet\ \textbf{with\_lines:} read lines from command\\
+\textbullet\ \textbf{with\_ini:} read data from a ini file\\
+\textbullet\ \textbf{with\_inventory\_hostnames:} list of inventory hosts matching a host pattern\\
+
+\begin{yamlbox}[title={playbook with loops 1}]
+---
+- name: my-playbook
+  hosts: all
+  become: yes
+  tasks:
+  - name: create a repository
+    file: 
+      state: directory
+      path: "/tmp/repo01/{{ item }}"
+      recurse: yes
+    with_items:
+    - subrepo01
+    - subrepo02
+    - subrepo03
+\end{yamlbox}
+
+\begin{yamlbox}[title={playbook with loops and dictionary}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: create a repository
+      file: 
+        state: directory
+        path: "/tmp/repo01/{{ item.dir }}/{{ item.fichier }}"
+        recurse: yes
+      with_items:
+      - {dir: "repo01", fichier: "file01.txt"}
+      - {dir: "repo01", fichier: "file02.txt"}
+      - {dir: "repo02", fichier: "file01.txt"}
+      - {dir: "repo03", fichier: "file01.txt"}
+  \end{yamlbox}
+
+  We can also define the dictionary in group\_vars for example:
+
+\begin{yamlbox}[title={group\_vars/all.yml}]
+---
+mydictionary:
+  - {dir: "repo01", fichier: "file01.txt"}
+  - {dir: "repo01", fichier: "file02.txt"}
+  - {dir: "repo02", fichier: "file01.txt"}
+  - {dir: "repo03", fichier: "file01.txt"}
+\end{yamlbox}
+
+\begin{yamlbox}[title={playbook with loops and dictionary (in group\_vars)}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: create a repository
+      file: 
+        state: directory
+        path: "/tmp/repo01/{{ item.dir }}/{{ item.fichier }}"
+        recurse: yes
+      with_items:
+      - "{{ mydictionary}}"
+\end{yamlbox}
+
+
+\begin{yamlbox}[title={playbook with loops and browse items}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: list elements in 'all' and create an repo by host
+      file: 
+        state: directory
+        path: "/tmp/repo02/{{ item }}"
+        recurse: yes
+      with_items:
+      - "{{ groups['all'] }}"
+\end{yamlbox}
+
+This is equivalent to:
+\begin{yamlbox}[title={playbook with loops over inventory}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: list elements in 'all' and create an repo by host
+      file: 
+        state: directory
+        path: "/tmp/repo02/{{ item }}"
+        recurse: yes
+      with_inventory_hostnames:
+      - "{{ groups['all'] }}"
+\end{yamlbox}
+
+% --------------------------------------------------
+% APT MODULE
+% --------------------------------------------------
+\section{apt module}
+
+Manages apt packages (such as for Debian/Ubuntu).\\
+
+\textbullet\ \textbf{allow\_unauthenticated:} Ignore if packages cannot be authenticated\\
+\textbullet\ \textbf{autoclean:} If yes, cleans the local repository of retrieved package files that can no longer be downloaded\\
+\textbullet\ \textbf{cache\_valid\_time:} Update the apt cache if it is older than the cache\_valid\_time (in seconds)\\
+\textbullet\ \textbf{deb:} Path to a .deb package on the remote machine\\
+\textbullet\ \textbf{default\_release:} Corresponds to the -t option for apt and sets pin priorities\\
+\textbullet\ \textbf{dpkg\_options:} Add dpkg options to apt command\\
+\textbullet\ \textbf{force:} Corresponds to the --force-yes to apt-get and implies allow\_unauthenticated: yes\\
+\textbullet\ \textbf{force\_apt\_get:} Force usage of apt-get instead of aptitude\\
+\textbullet\ \textbf{install\_recommends:} Corresponds to the --no-install-recommends option for apt\\
+\textbullet\ \textbf{name:} A list of package names, like foo, or package specifier with version, like foo=1.0 \\
+\textbullet\ \textbf{only\_upgrade:} Only upgrade a package if it is already installed\\
+\textbullet\ \textbf{policy\_rc\_d:} Force the exit code of /usr/sbin/policy-rc.d\\
+\textbullet\ \textbf{purge:} Will force purging of configuration files if the module state is set to absent\\
+\textbullet\ \textbf{state:} Indicates the desired package state. latest ensures that the latest version is installed\\
+\textbullet\ \textbf{update\_cache:} Run the equivalent of apt-get update before the operation\\
+\textbullet\ \textbf{upgrade:} If yes or safe, performs an aptitude safe-upgrade; If full, performs an aptitude full-upgrade; If dist, performs an apt-get dist-upgrade.
+
+\begin{yamlbox}[title={playbook using apt module}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: install haproxy
+      apt:
+        name: haproxy
+        default_release: stretch-backports # Debian stretch
+        update_cache: yes
+        cache_valid_time: 360
+\end{yamlbox}
+
+\begin{yamlbox}[title={playbook using apt module (2)}]
+  ---
+  - name: my-playbook
+    hosts: all
+    become: yes
+    tasks:
+    - name: install haproxy
+      apt:
+        name: haproxy
+        state: latest # last version
+        # state: absent to remove a package
+        # purge: yes to completely remove
+\end{yamlbox}
+
 % --------------------------------------------------
 % VARIABLES
 % --------------------------------------------------
